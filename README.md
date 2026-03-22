@@ -217,12 +217,3 @@ Application logs are written to `app.log` with DEBUG level detail, capturing:
 
 All sensitive configuration (API keys, URLs) is managed through environment variables in a `.env` file, keeping credentials secure and configuration flexible.
 
-## 🎯 Future Enhancements
-
-- Flight booking integration
-- Restaurant/activity recommendations
-- Weather forecasts for destinations
-- Budget estimation and optimization
-- Multi-city itinerary planning
-- User preferences and travel history
-- Mobile app interface
