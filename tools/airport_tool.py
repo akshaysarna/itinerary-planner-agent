@@ -1,9 +1,13 @@
 import json
 import logging
-
+from typing import List
+from pydantic import TypeAdapter
 from langchain.tools import tool
 from services.search_api import SearchApi
 from services.google_map_service import get_places_details
+
+from models.internal.airport import Airport
+from models.internal.location import Location
 
 """
     Tool to Search for airports
@@ -42,7 +46,7 @@ def search_airport_tool(city = ""):
     logging.debug(f'fetching nearest airports to the {city}')
 
 
-    places_details = get_places_details(f"Airport near {city}")
+    places = get_places_details(f"Airport near {city}")
 
     airport_details = SearchApi().get_airport_details(city)
  
@@ -50,34 +54,44 @@ def search_airport_tool(city = ""):
 
 
     for location in airport_details:
-        for airport in location.get('airports', []):
-            title = str(airport.get("title", "")).lower()
-            code = str(airport.get('airport_code',  ""))
+        for airport in location.airports:
+            title = str(airport.title).lower()
+            code = str(airport.airport_code)
             if title:
                 airport_codes[title] = code
 
-    airports = []
+    airports : List[Airport] = []
     
-    if places_details:
-        for place in places_details.get('places', []):
-            name = str(place.get('displayName', {}).get('text', "")).lower()
-            location = place.get('location', {})
-            address = place.get('formattedAddress', "")
-            airportCode = airport_codes.get(name, "")
-            name = name.upper()
+    if places:
+        for place in places:
             
-            if len(airports) < 3 and airportCode != "":
-                airports.append({
-                    'airport_code' : airportCode,
-                    'address' : address,
-                    'name' : name,
-                    'coordinates' : location
-                })
-            else:
+            name = str(place.displayNameText).lower()
+            location = place.location
+            address = place.formattedAddress
+            airportCode = airport_codes.get(name, "")
+            name = place.displayNameText
+            
+            if airportCode != "":
+                    
+                    coordinates = Location(latitude = location.latitude, 
+                        longitude = location.longitude) if location else None
+                    
+                    airports.append(
+                        Airport( 
+                            airport_code = airportCode,
+                            address = address, 
+                            name = name,
+                            coordinates = coordinates
+                        )
+                    )
+
+            elif len(airport) >= 3:
                 break
     
     logging.debug(f'fetched airports from google map and search api {len(airports)} for city {city}')
 
+    adapter = TypeAdapter(List[Airport])
+
     return json.dumps({
-        'airports': airports
+        'airports': adapter.dump_python(airports)
     })

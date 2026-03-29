@@ -2,11 +2,16 @@ import os
 import requests
 import logging
 
+from typing import List
+from clients.google_maps.request import Payload
+from clients.google_maps.place import Place
+from clients.google_maps.response import Response
+
 
 #
 #  API Calling for the Google Map Service
 #
-def get_places_details(searchQuery, fieldMask = None):
+def get_places_details(searchQuery, fieldMask = None) -> List[Place]:
     url = os.getenv("GOOGLE_MAP_PLACE_API_URL")
 
     if fieldMask is None:
@@ -23,14 +28,12 @@ def get_places_details(searchQuery, fieldMask = None):
     }
 
     #payload for api calling...
-    payload = {
-        "textQuery": searchQuery
-    }
+    payload = Payload(textQuery = searchQuery)
     
-    response = requests.post(url = url, json = payload, headers = headers, timeout = 5)
+    response = requests.post(url = url, json = payload.model_dump(), headers = headers, timeout = 10)
 
     if response.status_code == 200:
-        return response.json()
+        return Response.model_validate(response.json()).places
     else:
         logging.exception(f"Google Map API error (HTTP {response.status_code}): {response.text}")
         raise Exception(f"Google Map API error (HTTP {response.status_code}): {response.text}")

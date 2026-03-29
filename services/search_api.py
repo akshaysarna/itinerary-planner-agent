@@ -1,6 +1,7 @@
 import os
 import requests
 import logging
+from clients.search_api.response import Response
 
 # Class For Search API...
 class SearchApi:
@@ -31,7 +32,8 @@ class SearchApi:
         
         if response.status_code == 200:
             
-            return response.json()['locations']
+            
+            return Response.model_validate(response.json()).locations
 
         else:
             logging.error(f"Error While Fetching Airport Response from Search API {city}")

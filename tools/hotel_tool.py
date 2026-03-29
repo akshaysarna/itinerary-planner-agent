@@ -1,8 +1,15 @@
 import json
 import logging
 
+from typing import List
+from pydantic import TypeAdapter
+
 from langchain.tools import tool
+
+
 from services.google_map_service import get_places_details
+from models.internal.hotel import Hotel
+from models.internal.location import Location
 
 """
     Tool for Searching hotels
@@ -44,32 +51,29 @@ def search_hotel_tool(city = ""):
     places = get_places_details(f"Hotels in {city}", ["places.displayName"
     ,"places.formattedAddress","places.types","places.rating","places.regularOpeningHours.weekdayDescriptions", "places.location"])
 
-    hotels = []
-
     #Sorting Hotels By Ratings
-    hotels_details = sorted(places.get('places', []), key = lambda hotel: hotel.get('rating', 0), reverse = True)
+    hotels_details = sorted(places, key = lambda hotel: hotel.rating, reverse = True)
 
-
+    hotels: List[Hotel] = []
+    
     for hotel in hotels_details:
 
-        name = str(hotel.get('displayName', {}).get('text', "")).lower()
-        location = hotel.get('location', {})
-        address = hotel.get('formattedAddress', "")
-        rating = hotel.get('rating', 0.0)
+        name = str(hotel.displayNameText).lower()
+        location = hotel.location
+        address = hotel.formattedAddress
+        rating = hotel.rating
 
         if len(hotels) < 6:
-            hotels.append({
-                'name': name,
-                'coordinates': location,
-                'address' : address,
-                'rating': rating
-            })
+            coordinates = Location(latitude = location.latitude, longitude = location.longitude) if location else None
+            hotels.append(Hotel(name = name, address = address, rating = rating, coordinates = coordinates))
         else:
             break
         
     logging.debug(f'fetched hotels to the {hotels}')
 
+    adapter = TypeAdapter(List[Hotel])
+
     return json.dumps({
-        'hotels': hotels
+        'hotels': adapter.dump_python(hotels)
     })
     
