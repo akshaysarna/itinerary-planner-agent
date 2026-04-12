@@ -1,219 +1,202 @@
-# Itinerary Planner Agent
+# AI Itinerary Planner Agent
 
-An intelligent AI-powered travel planning assistant built with LangChain and Claude that helps users plan trips by automatically finding airports and hotels based on their destination.
+A production-style **AI-powered itinerary planning agent** built with a clean, modular Python architecture.
 
-## 📋 Project Overview
+This project demonstrates how to design an agent-based system that accepts a destination as input, orchestrates multiple tools, validates requests, calls external travel APIs, and returns structured itinerary suggestions such as **nearest airports, hotel recommendations, and travel planning details**.
 
-The Itinerary Planner Agent is a conversational AI system that leverages Claude LLM to provide structured travel itineraries. It uses a multi-tool approach to gather real-time data about airports and hotels, then synthesizes this information into a comprehensive travel plan.
+It is designed as both a **reference project for scalable backend + AI agent architecture** and a **portfolio-ready engineering project**.
 
-## 🏗️ Architecture
+---
 
-### Project Structure
-```
-itinerary-planner-agent/
-├── main.py                          # Entry point - initializes the agent and logging
-├── requirements.txt                 # Python dependencies
-├── agents/
-│   └── itinerary_agent.py          # Core agent logic with LLM orchestration
-├── llm/
-│   └── claude.py                   # Claude LLM configuration and initialization
-├── services/
-│   ├── google_map_service.py       # Google Maps Places API integration
-│   └── search_api.py               # External Search API for airport data
-└── tools/
-    ├── airport_tool.py             # Tool to search nearby airports
-    └── hotel_tool.py               # Tool to search available hotels
-```
+## Overview
 
-## 🔧 Core Components
+The goal of this project is to showcase how modern AI-agent workflows can be designed using production engineering principles:
 
-### 1. **main.py** - Application Entry Point
-- Loads environment variables from `.env` file
-- Sets up logging framework (logs to `app.log`)
-- Initializes the async itinerary agent
-- Entry point for the application
+* clear separation of concerns
+* service-oriented design
+* tool-based orchestration
+* retry and resilience patterns
+* validation and configuration management
+* scalable folder structure
 
-### 2. **agents/itinerary_agent.py** - Agent Orchestration
-The core intelligence engine that:
-- **Initializes Claude LLM** with haiku-4-5 model
-- **Creates tools array** with airport and hotel search tools
-- **Defines system prompt** that instructs the AI to:
-  1. Identify the destination
-  2. Search for nearest airports
-  3. Find suitable hotels
-  4. Generate a structured itinerary
+This project is especially useful for developers learning how to move from a prototype script to a **production-ready AI backend service**.
 
-**Key Features:**
-- Conversation memory (last 5 exchanges)
-- Tool calling mechanism to perform searches
-- Streaming responses for real-time output
-- Strict completion rules to prevent redundant API calls
-- Structured output format (Destination, Airport, Hotels, Day-wise Itinerary)
+---
 
-### 3. **llm/claude.py** - LLM Configuration
-- Wraps Anthropic's Claude API
-- Default model: `claude-haiku-4-5`
-- Configurable temperature (0.7), streaming, and timeout
-- Returns a ChatAnthropic instance for use in agents
+## Features
 
-### 4. **services/google_map_service.py** - Google Maps Integration
-- Calls Google Places API for location searches
-- Supports flexible field masking for data retrieval
-- Returns place details including:
-  - Display name
-  - Address
-  - Geographic coordinates
-  - Ratings (for hotels)
-  - Opening hours
+* Modular **agent orchestration layer**
+* Dedicated **tool abstraction layer**
+* Service-based external API integrations
+* Centralized validation and config management
+* Retry support with exponential backoff using `tenacity`
+* Async-ready workflow design
+* Structured logging
+* Clean and scalable project structure
+* Easy to extend with new tools/services
 
-**API Configuration via environment variables:**
-- `GOOGLE_MAP_PLACE_API_URL` - Base API endpoint
-- `GOOGLE_API_TOKEN` - Authentication token
+---
 
-### 5. **services/search_api.py** - Airport Search Service
-- Integrates with external airport search API
-- `get_airport_details()` - Fetches airport information by city name
-- Returns airport codes, names, and location details
-- Error handling for API failures
+## Project Structure
 
-**API Configuration via environment variables:**
-- `SEARCH_API_BASE_URL` - Base URL for search service
-- `SEARCH_API_KEY` - API authentication key
-- `SEARCH_API_AIRPORT_DETAILS` - Endpoint path for airport search
-
-### 6. **tools/airport_tool.py** - Airport Search Tool
-**Purpose:** Find airports serving a destination
-
-**Functionality:**
-- Takes city name as input
-- Queries Google Places API for nearby airports
-- Retrieves airport codes from Search API
-- Returns: airport name, address, coordinates, airport code
-- Limits results to 1-3 most relevant airports
-
-**Tool Usage Rules:**
-- Call at most once per request
-- Avoid duplicate calls with same input
-
-### 7. **tools/hotel_tool.py** - Hotel Search Tool
-**Purpose:** Discover accommodations in a destination
-
-**Functionality:**
-- Takes city/location name as input
-- Queries Google Places API for hotels
-- Returns: hotel name, address, coordinates, ratings
-- Sorts results by rating (highest first)
-- Filters hotels with rating ≥ 3.5
-- Limits results to 5-10 hotels
-
-**Tool Usage Rules:**
-- Avoid calling multiple times for same location
-- Use results to make informed accommodation decisions
-
-## 📦 Dependencies
-
-```
-langchain==1.2.13                  # LLM orchestration framework
-langchain-core==1.2.20             # Core LangChain utilities
-langchain-anthropic==1.4.0         # Anthropic Claude integration
-langchain-community==0.4.1         # Community integrations
-python-dotenv>=1.0.0               # Environment variable management
-Flask==3.1.3                       # Web framework (optional)
-numpy==2.4.3                       # Numerical computing
-requests>=2.31.0                   # HTTP library for API calls
+```text
+agents/       # agent orchestration and workflow logic
+services/     # external API/service integrations
+tools/        # callable tools used by the agent
+clients/      # request/response models and DTOs
+models/       # domain models
+config.py     # application constants and settings
+validation.py # validation helpers
+main.py       # application entry point
 ```
 
-## 🚀 Usage
+---
 
-### Setup
-1. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+## Architecture
 
-2. Create `.env` file with required environment variables:
-   ```
-   GOOGLE_MAP_PLACE_API_URL=<Your Google Places API endpoint>
-   GOOGLE_API_TOKEN=<Your Google API key>
-   SEARCH_API_BASE_URL=<Your Search API base URL>
-   SEARCH_API_AIRPORT_DETAILS=<Airport details endpoint>
-   SEARCH_API_KEY=<Your Search API key>
-   ANTHROPIC_API_KEY=<Your Anthropic API key>
-   ```
+```text
+User Input
+   ↓
+Agent Layer
+   ↓
+Tool Layer
+   ↓
+Service Layer
+   ↓
+External APIs
+   ↓
+Structured Itinerary Response
+```
 
-### Running the Agent
+### Layer Responsibilities
+
+### Agent Layer
+
+Responsible for:
+
+* understanding user request
+* deciding tool execution order
+* orchestrating workflow
+* aggregating final response
+
+### Tool Layer
+
+Responsible for:
+
+* input validation
+* response transformation
+* service invocation
+* reusable business actions
+
+### Service Layer
+
+Responsible for:
+
+* external API communication
+* retries
+* request formatting
+* response parsing
+
+This layered design makes the application **maintainable, testable, and scalable**.
+
+---
+
+## Tech Stack
+
+* **Python**
+* **asyncio**
+* **requests / http clients**
+* **tenacity** for retry logic
+* **logging**
+* modular service architecture
+
+---
+
+## Installation
+
+Clone the repository:
+
+```bash
+git clone <your-repo-url>
+cd itinerary-planner-agent
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Configuration
+
+Create a `.env` file or configure your API keys in config:
+
+```text
+GOOGLE_MAP_PLACE_API_URL=<Your Google Places API endpoint>
+GOOGLE_API_TOKEN=<Your Google API key>
+SEARCH_API_BASE_URL=<Your Search API base URL>
+SEARCH_API_AIRPORT_DETAILS=<Airport details endpoint>
+SEARCH_API_KEY=<Your Search API key>
+ANTHROPIC_API_KEY=<Your Anthropic API key>
+```
+
+Recommended: include `.env` in the repository.
+
+---
+
+## Running the Project
+
 ```bash
 python main.py
 ```
 
-### Interaction Flow
-1. Start the application
-2. Enter your travel query (e.g., "Plan a 3-day trip to Goa")
-3. The agent will:
-   - Identify the destination
-   - Automatically search for nearby airports
-   - Find recommended hotels
-   - Generate a structured itinerary
-4. Enter `0` to exit
+---
 
-### Example Conversation
-```
-Welcome to Itinerary Portal
-> Plan a weekend trip to Mumbai
+## Example Usage
 
-Destination: Mumbai
-Nearest Airport: Bombay International Airport (BOM)
-Recommended Hotels (prefer rating):
-  1. The Oberoi Mumbai (Rating: 4.6)
-  2. Taj Holel (Rating: 4.5)
-  3. Hilton Mumbai (Rating: 4.4)
-Itinerary:
-  1. Day 1: Arrive at BOM, check-in, visit Gateway of India
-  2. Day 2: Explore Marine Drive, Bollywood studios
-  3. Day 3: Visit markets, depart
+### Input
+
+```text
+Goa
 ```
 
-## 🔄 Workflow
+### Output
 
-```
-User Input
-    ↓
-[Itinerary Agent]
-    ↓
-Parse destination
-    ↓
-Call [Airport Tool] → Google Maps API + Search API
-    ↓
-Call [Hotel Tool] → Google Maps API
-    ↓
-Claude LLM synthesizes data
-    ↓
-Generate structured itinerary
-    ↓
-Stream response to user
-    ↓
-Back to user input
+```text
+Nearest airport: Goa International Airport
+Top hotel recommendations
+Suggested itinerary summary
 ```
 
-## 🛠️ Key Features
+---
 
-✅ **AI-Powered Planning** - Uses Claude LLM for intelligent recommendations
-✅ **Real-time Data** - Integrates live data from Google Maps and airport APIs
-✅ **Asynchronous Processing** - Non-blocking operations for responsive UX
-✅ **Conversation Memory** - Maintains context across multiple exchanges
-✅ **Structured Output** - Consistent, formatted itinerary responses
-✅ **Error Handling** - Comprehensive logging and exception management
-✅ **API Integration** - Multiple external service integrations
+## Engineering Highlights
 
-## 📝 Logging
+This project intentionally focuses on production engineering practices:
 
-Application logs are written to `app.log` with DEBUG level detail, capturing:
-- API requests and responses
-- Agent execution flow
-- Error conditions and exceptions
-- Tool invocations
+* modular folder design
+* low coupling / high cohesion
+* centralized validation
+* retry with exponential backoff
+* reusable service abstractions
+* clean logging strategy
+
+These patterns are commonly used in **real-world backend and AI systems**.
+
+---
+
+## Use Cases
+
+This project can be used as:
+
+* reference architecture for AI agents
+* backend system design sample
+* interview portfolio project
+* base template for FastAPI AI services
+* Docker / Kubernetes learning project
 
 ## 🔐 Environment Variables
 
 All sensitive configuration (API keys, URLs) is managed through environment variables in a `.env` file, keeping credentials secure and configuration flexible.
-
