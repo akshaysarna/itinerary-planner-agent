@@ -1,7 +1,11 @@
 import os
 import requests
 import logging
+from tenacity import retry, stop_after_attempt, wait_exponential, before_sleep_log
+from config import API_CONFIG
 from clients.search_api.response import Response
+
+session = requests.Session()
 
 # Class For Search API...
 class SearchApi:
@@ -22,13 +26,19 @@ class SearchApi:
 
 
     #Get Airport Details by City Name....    
+    @retry(
+        stop= stop_after_attempt(API_CONFIG.SEARCH_API_RETRY_ATTEMPTS), 
+        wait = wait_exponential(multiplier = 1, min =2 , max = 6), 
+        before_sleep = before_sleep_log(logging, logging.WARNING),
+        reraise = True
+    )
     def get_airport_details(self, city = ""):
 
         #Service URL
         service_url = self.airport_search_url + "&q={city}&api_key={key}".format(city = city, key = self.api_key)
         
         #Fetching Response From Search API
-        response = requests.get(service_url, timeout = 5)
+        response = session.get(service_url, timeout = API_CONFIG.SEARCH_API_TIMEOUT)
         
         if response.status_code == 200:
             

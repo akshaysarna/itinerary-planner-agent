@@ -66,13 +66,16 @@ async def itinerary_agent():
             #Streaming Response from Agent in Console
             async for event in agent_executor.astream_events({'input': prompt}, version= "v1"):
                 event_type = event.get('event', "")
-                if event_type.__eq__("on_chat_model_stream"):
-                    chunk = event.get('data', {})['chunk']
-                    if chunk.content:
-                        for block in chunk.content:
-                            if block['type'] == 'text': 
-                                print(block['text'], end="", flush=True)
-        except:
-            logging.exception("Agent Execution Error")
+                if event_type == "on_chat_model_stream":
+                    try:
+                        chunk = event.get('data', {})['chunk']
+                        if chunk and hasattr(chunk, 'content') and chunk.content:
+                            for block in chunk.content:
+                                if isinstance(block, dict) and block.get('type')== 'text': 
+                                    print(block.get('text'), end="", flush=True)
+                    except Exception as e:
+                        logging.exception(f"Error processing stream chunk: {str(e)}")
+        except Exception as e:
+            logging.exception(f"Agent Execution Error : {str(e)}")
         
         prompt = input("\n Provide Query or Enter 0 for Exit \n").strip()

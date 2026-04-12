@@ -5,3 +5,6 @@ tools/__pycache__/
 .env
 app.log
 clients/google_maps/__pycache__/
+__pycache__/config.cpython-313.pyc
+__pycache__/validation.cpython-313.pyc
+.DS_Store

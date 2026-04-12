@@ -6,7 +6,8 @@ from pydantic import TypeAdapter
 
 from langchain.tools import tool
 
-
+from config import API_CONFIG
+from validation import valid_city
 from services.google_map_service import get_places_details
 from models.internal.hotel import Hotel
 from models.internal.location import Location
@@ -15,7 +16,7 @@ from models.internal.location import Location
     Tool for Searching hotels
 """
 @tool
-def search_hotel_tool(city = ""):
+def search_hotel_tool(city: str = "") -> str:
 
     """
         Searches hotels in a given city or location using Google Maps data.
@@ -25,7 +26,7 @@ def search_hotel_tool(city = ""):
         - You are Selecting hotels for Itinerary
 
         Input:
-        - location(string): Name of City, Area (e.g. "Goa", "South Goa")
+        - city(string): Name of City, Area (e.g. "Goa", "South Goa")
 
         Returns:
         List of hotels with Following Details:
@@ -43,7 +44,7 @@ def search_hotel_tool(city = ""):
         - Use results from this tool to make informed decision about accomodations selection
     """
 
-    if not city or not city.strip():
+    if not valid_city(city):
         raise ValueError("City name cannot be empty")
 
     logging.debug(f'fetching hotels to the {city}')
@@ -63,7 +64,7 @@ def search_hotel_tool(city = ""):
         address = hotel.formattedAddress
         rating = hotel.rating
 
-        if len(hotels) < 6:
+        if API_CONFIG.HOTEL_MAX_RESULTS > len(hotels):
             coordinates = Location(latitude = location.latitude, longitude = location.longitude) if location else None
             hotels.append(Hotel(name = name, address = address, rating = rating, coordinates = coordinates))
         else:
