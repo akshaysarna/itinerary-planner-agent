@@ -3,7 +3,7 @@ from langchain_anthropic import ChatAnthropic
 #
 #  Return Claude Model with Provided Conditions
 #
-def get_claude_llm(model_name : str = "claude-haiku-4-5", temperature : float = 0.7, streaming : bool = True, timeout : int = 60):
+def get_claude_llm(model_name : str = "claude-haiku-4-5", temperature : float = 0.7, streaming : bool = True, timeout : int = 60, top_p : float = 0.7):
     """
     Return a Claude Model with provided conditions.
 
@@ -25,7 +25,8 @@ def get_claude_llm(model_name : str = "claude-haiku-4-5", temperature : float = 
 
     return ChatAnthropic(
         model_name = model_name,
-        temperature = temperature, 
+        temperature = temperature,
+        top_p = top_p if temperature is None else None,
         stop = None, 
         streaming = streaming,
         timeout = timeout
