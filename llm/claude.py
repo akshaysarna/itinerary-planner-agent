@@ -12,6 +12,11 @@ def get_claude_llm(model_name : str = "claude-haiku-4-5", temperature : float = 
         temperature: The temperature setting for the model. Must be between 0 and 1. Defaults to 0.7.
         streaming: Whether to enable streaming responses. Defaults to True.
         timeout: The timeout in seconds for API requests. Defaults to 60.
+        
+    Note:
+        Anthropic recommends using either temperature or top_p, not both.
+        Only temperature is used here. To use top_p instead, pass temperature=None
+        and extend this function accordingly.
 
     Returns:
         ChatAnthropic: An instance of the Anthropic Claude chat model.
@@ -25,7 +30,7 @@ def get_claude_llm(model_name : str = "claude-haiku-4-5", temperature : float = 
 
     return ChatAnthropic(
         model_name = model_name,
-        temperature = temperature, 
+        temperature = temperature,
         stop = None, 
         streaming = streaming,
         timeout = timeout

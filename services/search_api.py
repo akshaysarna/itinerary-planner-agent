@@ -10,20 +10,24 @@ session = requests.Session()
 # Class For Search API...
 class SearchApi:
 
-    api_key = ''
-    airport_search_url = ''
-    flight_search_url = ''
+    search_api_instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls.search_api_instance is None:
+            cls.search_api_instance = super().__new__(cls)
+        return cls.search_api_instance
 
     def __init__(self):
-        base_url = os.getenv("SEARCH_API_BASE_URL")
-        self.api_key = os.getenv("SEARCH_API_KEY")
+        if not getattr(self, '_initialized', False):
+            base_url = os.getenv("SEARCH_API_BASE_URL")
+            self.api_key = os.getenv("SEARCH_API_KEY")
 
-        if not base_url or not self.api_key:
-            raise ValueError("Missing Properties SEARCH_API_BASE_URL or SEARCH_API_KEY")
+            if not base_url or not self.api_key:
+                raise ValueError("Missing Properties SEARCH_API_BASE_URL or SEARCH_API_KEY")
 
-        self.airport_search_url = base_url + os.getenv("SEARCH_API_AIRPORT_DETAILS")
-        self.flight_search_url = base_url + os.getenv("SEARCH_API_AIRPORT_DETAILS")
-
+            self.airport_search_url = base_url + os.getenv("SEARCH_API_AIRPORT_DETAILS")
+            self._initialized = True
+            
 
     #Get Airport Details by City Name....    
     @retry(

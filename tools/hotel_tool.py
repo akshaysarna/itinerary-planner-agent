@@ -59,7 +59,7 @@ def search_hotel_tool(city: str = "") -> str:
     
     for hotel in hotels_details:
 
-        name = str(hotel.displayNameText).lower()
+        name = hotel.displayNameText
         location = hotel.location
         address = hotel.formattedAddress
         rating = hotel.rating

@@ -88,27 +88,3 @@ def valid_city(city: str) -> bool:
         return False
     
     return True
-
-
-# ============================================================================
-# FUTURE VALIDATORS - Add here as project grows
-# ============================================================================
-
-def valid_email(email: str) -> bool:
-    """
-    Validates email address format.
-    
-    (Implementation to be added when email feature is needed)
-    """
-    # TODO: Implement when booking confirmation feature is added
-    pass
-
-
-def valid_date_range(start_date: str, end_date: str) -> bool:
-    """
-    Validates date range (start <= end).
-    
-    (Implementation to be added when date validation is needed)
-    """
-    # TODO: Implement when trip date selection feature is added
-    pass

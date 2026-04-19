@@ -1,7 +1,8 @@
 langchain==1.2.13
-langchain-core==1.2.20
+langchain-core==1.2.31
 langchain-anthropic==1.4.0
 langchain-community==0.4.1
+langchain-classic==1.0.4
 python-dotenv>=1.0.0
 requests>=2.31.0
 tenacity==9.1.4

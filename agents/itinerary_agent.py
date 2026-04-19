@@ -63,6 +63,9 @@ async def itinerary_agent():
     
     while prompt != '0':
         try:
+            if prompt == '':
+                prompt = input("Provide Query \n").strip()
+                continue
             #Streaming Response from Agent in Console
             async for event in agent_executor.astream_events({'input': prompt}, version= "v1"):
                 event_type = event.get('event', "")
