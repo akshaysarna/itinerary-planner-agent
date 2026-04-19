@@ -76,7 +76,7 @@ def search_airport_tool(city: str = "") -> str:
             airportCode = airport_codes.get(key, "")
             name = place.displayNameText
 
-            if API_CONFIG.AIRPORT_MAX_RESULTS >= len(airports) and airportCode != "":
+            if API_CONFIG.AIRPORT_MAX_RESULTS > len(airports) and airportCode != "":
                 coordinates = Location(latitude = location.latitude, 
                     longitude = location.longitude) if location else None
                         
